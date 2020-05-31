@@ -4,14 +4,13 @@
     <parent>
         <groupId>app.owlcms</groupId>
         <artifactId>owlcms4top</artifactId>
-        <version>4.7.5-beta11</version>
+        <version>4.7.4.1</version>
     </parent>
-
-    <artifactId>owlcms-docker</artifactId>
-
 
     <name>Owlcms Docker packaging</name>
     <description>Owlcms Docker for use in Kubernetes</description>
+    <artifactId>owlcms-docker</artifactId>
+    <version>${revision}</version>
     <packaging>docker</packaging>
 
     <dependencies>
@@ -90,7 +89,10 @@
                         <image>
                             <name>owlcms:${dockerTag}</name>
                             <build>
-                                <tags>latest</tags>
+                                <tags>
+                                    <tag>latest</tag>
+                                    <tag>${project.version}</tag>
+                                </tags>
                                 <from>adoptopenjdk/openjdk8:latest</from>
                                 <assembly>
                                     <descriptor>docker.xml</descriptor>
