@@ -33,11 +33,11 @@ import app.owlcms.data.athlete.Athlete;
 import app.owlcms.data.platform.Platform;
 import app.owlcms.data.platform.PlatformRepository;
 import app.owlcms.fieldofplay.FOPEvent;
-import app.owlcms.fieldofplay.UIEvent;
 import app.owlcms.init.OwlcmsSession;
 import app.owlcms.ui.crudui.OwlcmsCrudFormFactory;
 import app.owlcms.ui.shared.AthleteGridContent;
 import app.owlcms.ui.shared.AthleteGridLayout;
+import app.owlcms.uievents.UIEvent;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
@@ -205,9 +205,11 @@ public class TCContent extends AthleteGridContent implements HasDynamicTitle {
         lightBar.addFormItem(barWeight, getTranslation("BarWeight"));
         int min = 1;
         int max = 20;
-        IntegerRangeValidator integerValidator = new IntegerRangeValidator(getTranslation("BetweenValues", min, max), min, max);
+        IntegerRangeValidator integerValidator = new IntegerRangeValidator(getTranslation("BetweenValues", min, max),
+                min, max);
         binder.forField(barWeight).withConverter(converter)
-                .withValidator((v,c) -> BooleanUtils.isTrue(useOtherBar.getValue()) ? integerValidator.apply(v, c) : ValidationResult.ok())
+                .withValidator((v, c) -> BooleanUtils.isTrue(useOtherBar.getValue()) ? integerValidator.apply(v, c)
+                        : ValidationResult.ok())
                 .bind(Platform::getLightBar, Platform::setLightBar);
 
         VerticalLayout platesDisplay = new VerticalLayout(plates);

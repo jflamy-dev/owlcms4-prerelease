@@ -38,9 +38,7 @@ import app.owlcms.data.athlete.LiftDefinition.Changes;
 import app.owlcms.data.athlete.LiftInfo;
 import app.owlcms.data.athlete.XAthlete;
 import app.owlcms.data.competition.Competition;
-import app.owlcms.displays.attemptboard.BreakDisplay;
 import app.owlcms.fieldofplay.FieldOfPlay;
-import app.owlcms.fieldofplay.UIEvent;
 import app.owlcms.i18n.Translator;
 import app.owlcms.init.OwlcmsFactory;
 import app.owlcms.init.OwlcmsSession;
@@ -48,6 +46,8 @@ import app.owlcms.ui.lifting.UIEventProcessor;
 import app.owlcms.ui.parameters.DarkModeParameters;
 import app.owlcms.ui.shared.RequireLogin;
 import app.owlcms.ui.shared.SafeEventBusRegistration;
+import app.owlcms.uievents.BreakDisplay;
+import app.owlcms.uievents.UIEvent;
 import app.owlcms.utils.LoggerUtils;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -490,12 +490,12 @@ public class TopSinclair extends PolymerTemplate<TopSinclair.TopSinclairModel> i
         this.getElement().setProperty("topSinclairMen",
                 sortedMen2 != null && sortedMen2.size() > 0 ? getTranslation("Scoreboard.TopSinclairMen") : "");
         this.getElement().setPropertyJson("sortedMen", getAthletesJson(sortedMen2, true));
-        
+
         List<Athlete> sortedWomen2 = getSortedWomen();
         this.getElement().setProperty("topSinclairWomen",
                 sortedWomen2 != null && sortedWomen2.size() > 0 ? getTranslation("Scoreboard.TopSinclairWomen") : "");
         this.getElement().setPropertyJson("sortedWomen", getAthletesJson(sortedWomen2, false));
-        
+
         logger.debug("updateBottom {} {}", sortedWomen2, sortedMen2);
     }
 

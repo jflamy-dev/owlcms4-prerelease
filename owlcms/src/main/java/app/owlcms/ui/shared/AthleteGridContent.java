@@ -57,11 +57,9 @@ import app.owlcms.data.athlete.Athlete;
 import app.owlcms.data.athlete.Gender;
 import app.owlcms.data.group.Group;
 import app.owlcms.data.group.GroupRepository;
-import app.owlcms.fieldofplay.BreakType;
 import app.owlcms.fieldofplay.FOPEvent;
 import app.owlcms.fieldofplay.FOPState;
 import app.owlcms.fieldofplay.FieldOfPlay;
-import app.owlcms.fieldofplay.UIEvent;
 import app.owlcms.i18n.Translator;
 import app.owlcms.init.OwlcmsSession;
 import app.owlcms.ui.crudui.OwlcmsCrudFormFactory;
@@ -73,6 +71,8 @@ import app.owlcms.ui.lifting.JuryContent;
 import app.owlcms.ui.lifting.UIEventProcessor;
 import app.owlcms.ui.parameters.QueryParameterReader;
 import app.owlcms.ui.shared.BreakManagement.CountdownType;
+import app.owlcms.uievents.BreakType;
+import app.owlcms.uievents.UIEvent;
 import app.owlcms.utils.LoggerUtils;
 import app.owlcms.utils.URLUtils;
 import ch.qos.logback.classic.Level;
@@ -142,7 +142,7 @@ public abstract class AthleteGridContent extends VerticalLayout
      * In the current implementation groupSelect is readOnly. If it is made editable, it needs to set the value on
      * groupFilter.
      */
-    protected ComboBox<Group> groupFilter = new ComboBox<>();
+    private ComboBox<Group> groupFilter = new ComboBox<>();
     protected ComboBox<Gender> genderFilter = new ComboBox<>();
     private String topBarTitle;
 
@@ -206,26 +206,11 @@ public abstract class AthleteGridContent extends VerticalLayout
         crudLayout.hideForm();
         crudGrid.getGrid().asSingleSelect().clear();
     }
-    
-    @Override
-    public OwlcmsCrudGrid<?> getEditingGrid() {
-        return crudGrid;
-    }
 
     public HorizontalLayout createTopBarLeft() {
         setTopBarLeft(new HorizontalLayout());
         fillTopBarLeft();
         return getTopBarLeft();
-    }
-
-    protected void fillTopBarLeft() {
-        title = new H3();
-        title.setText(getTopBarTitle());
-        title.getStyle().set("margin-top", "0px").set("margin-bottom", "0px").set("font-weight", "normal");
-        getTopBarLeft().add(title, topBarGroupSelect);
-        getTopBarLeft().setAlignItems(Alignment.CENTER);
-        getTopBarLeft().setPadding(true);
-        getTopBarLeft().setId("topBarLeft");
     }
 
     /**
@@ -264,6 +249,15 @@ public abstract class AthleteGridContent extends VerticalLayout
         }
     }
 
+    @Override
+    public OwlcmsCrudGrid<?> getEditingGrid() {
+        return crudGrid;
+    }
+
+    public H2 getFirstNameWrapper() {
+        return firstNameWrapper;
+    }
+
     /**
      * @return the groupFilter
      */
@@ -300,6 +294,10 @@ public abstract class AthleteGridContent extends VerticalLayout
 
     }
 
+    public void setFirstNameWrapper(H2 firstNameWrapper) {
+        this.firstNameWrapper = firstNameWrapper;
+    }
+
     @Override
     public void setLocation(Location location) {
         this.location = location;
@@ -333,25 +331,6 @@ public abstract class AthleteGridContent extends VerticalLayout
     }
 
     @Subscribe
-    public void slaveBroadcast(UIEvent.Broadcast e) {
-        UIEventProcessor.uiAccess(topBarGroupSelect, uiEventBus, e, () -> {
-            Icon close = VaadinIcon.CLOSE_CIRCLE_O.create();
-            close.getStyle().set("margin-left", "2em");
-            close.setSize("4em");
-            Notification notification = new Notification();
-            Label label = new Label();
-            label.getElement().setProperty("innerHTML", getTranslation(e.getMessage()));
-            HorizontalLayout content = new HorizontalLayout(label, close);
-            notification.add(content);
-            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            notification.setDuration(-1);
-            close.addClickListener(event -> notification.close());
-            notification.setPosition(Position.MIDDLE);
-            notification.open();
-        });
-    }
-    
-    @Subscribe
     public void slaveBreakDone(UIEvent.BreakDone e) {
         UIEventProcessor.uiAccess(topBarGroupSelect, uiEventBus, e, () -> {
             logger.debug("stopping break");
@@ -371,6 +350,25 @@ public abstract class AthleteGridContent extends VerticalLayout
                 logger.debug("starting break {}", LoggerUtils.stackTrace());
             }
             syncWithFOP(true);
+        });
+    }
+
+    @Subscribe
+    public void slaveBroadcast(UIEvent.Broadcast e) {
+        UIEventProcessor.uiAccess(topBarGroupSelect, uiEventBus, e, () -> {
+            Icon close = VaadinIcon.CLOSE_CIRCLE_O.create();
+            close.getStyle().set("margin-left", "2em");
+            close.setSize("4em");
+            Notification notification = new Notification();
+            Label label = new Label();
+            label.getElement().setProperty("innerHTML", getTranslation(e.getMessage()));
+            HorizontalLayout content = new HorizontalLayout(label, close);
+            notification.add(content);
+            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            notification.setDuration(-1);
+            close.addClickListener(event -> notification.close());
+            notification.setPosition(Position.MIDDLE);
+            notification.open();
         });
     }
 
@@ -563,7 +561,7 @@ public abstract class AthleteGridContent extends VerticalLayout
 
         crudGrid.setCrudListener(this);
         crudGrid.setClickRowToUpdate(true);
-        crudLayout.addToolbarComponent(groupFilter);
+        crudLayout.addToolbarComponent(getGroupFilter());
 
         return crudGrid;
     }
@@ -730,14 +728,14 @@ public abstract class AthleteGridContent extends VerticalLayout
         });
         crudLayout.addFilterComponent(lastNameFilter);
 
-        groupFilter.setPlaceholder(getTranslation("Group"));
-        groupFilter.setItems(GroupRepository.findAll());
-        groupFilter.setItemLabelGenerator(Group::getName);
+        getGroupFilter().setPlaceholder(getTranslation("Group"));
+        getGroupFilter().setItems(GroupRepository.findAll());
+        getGroupFilter().setItemLabelGenerator(Group::getName);
         // hide because the top bar has it
-        groupFilter.getStyle().set("display", "none");
+        getGroupFilter().getStyle().set("display", "none");
         // we do not set the group filter value
-        groupFilter.addValueChangeListener(e -> {
-            UIEventProcessor.uiAccess(groupFilter, uiEventBus, () -> {
+        getGroupFilter().addValueChangeListener(e -> {
+            UIEventProcessor.uiAccess(getGroupFilter(), uiEventBus, () -> {
                 Group newGroup = e.getValue();
                 OwlcmsSession.withFop((fop) -> {
                     oldGroup = fop.getGroup();
@@ -748,17 +746,19 @@ public abstract class AthleteGridContent extends VerticalLayout
 //                        logger.debug("filter switching group from {} to {}",
 //                                oldGroup != null ? oldGroup.getName() : null,
 //                                newGroup != null ? newGroup.getName() : null);
-                        fop.getFopEventBus().post(new FOPEvent.SwitchGroup(newGroup, this));
-                        oldGroup = newGroup;
+                      logger.debug("value changed, switching group");
+                      fop.getFopEventBus().post(new FOPEvent.SwitchGroup(newGroup, this));
+                      oldGroup = newGroup;
 //                        // we listen to the UI switch group that will result from the FOP switchgroup
 //                    } else {
 //                        // loadGroup will emit FOP SwitchGroup which will emit UI switchgroup that we listen to .
-//                        fop.loadGroup(newGroup, this, true);
+  //                        logger.debug("{} loading group {} {} {} {} {}", myId, newGroup, System.identityHashCode(newGroup), oldGroup, System.identityHashCode(oldGroup), LoggerUtils.stackTrace());
+  //                        fop.loadGroup(newGroup, this, newGroup != oldGroup);
 //                    }
                 });
             });
         });
-        crudLayout.addFilterComponent(groupFilter);
+        crudLayout.addFilterComponent(getGroupFilter());
     }
 
     protected void doUpdateTopBar(Athlete athlete, Integer timeAllowed) {
@@ -809,8 +809,22 @@ public abstract class AthleteGridContent extends VerticalLayout
         });
     }
 
+    protected void fillTopBarLeft() {
+        title = new H3();
+        title.setText(getTopBarTitle());
+        title.getStyle().set("margin-top", "0px").set("margin-bottom", "0px").set("font-weight", "normal");
+        getTopBarLeft().add(title, topBarGroupSelect);
+        getTopBarLeft().setAlignItems(Alignment.CENTER);
+        getTopBarLeft().setPadding(true);
+        getTopBarLeft().setId("topBarLeft");
+    }
+
     protected Object getOrigin() {
         return this;
+    }
+
+    protected HorizontalLayout getTopBarLeft() {
+        return topBarLeft;
     }
 
     protected String getTopBarTitle() {
@@ -851,6 +865,10 @@ public abstract class AthleteGridContent extends VerticalLayout
             // we listen on uiEventBus.
             uiEventBus = uiEventBusRegister(this, fop);
         });
+    }
+
+    protected void setTopBarLeft(HorizontalLayout topBarLeft) {
+        this.topBarLeft = topBarLeft;
     }
 
     /**
@@ -1055,20 +1073,8 @@ public abstract class AthleteGridContent extends VerticalLayout
         }
     }
 
-    public H2 getFirstNameWrapper() {
-        return firstNameWrapper;
-    }
-
-    public void setFirstNameWrapper(H2 firstNameWrapper) {
-        this.firstNameWrapper = firstNameWrapper;
-    }
-
-    protected HorizontalLayout getTopBarLeft() {
-        return topBarLeft;
-    }
-
-    protected void setTopBarLeft(HorizontalLayout topBarLeft) {
-        this.topBarLeft = topBarLeft;
+    protected void setGroupFilter(ComboBox<Group> groupFilter) {
+        this.groupFilter = groupFilter;
     }
 
 }

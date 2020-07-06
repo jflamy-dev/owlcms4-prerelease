@@ -102,7 +102,8 @@ public class PackageContent extends AthleteGridContent implements HasDynamicTitl
     @Override
     public Collection<Athlete> findAll() {
         List<Athlete> athletes = AthleteSorter.resultsOrderCopy(
-                AthleteRepository.findAllByGroupAndWeighIn(groupFilter.getValue(), genderFilter.getValue(), true), Ranking.TOTAL);
+                AthleteRepository.findAllByGroupAndWeighIn(getGroupFilter().getValue(), genderFilter.getValue(), true),
+                Ranking.TOTAL);
         AthleteSorter.assignCategoryRanks(athletes, Ranking.TOTAL);
         AthleteSorter.resultsOrder(athletes, Ranking.SNATCH);
         AthleteSorter.assignCategoryRanks(athletes, Ranking.SNATCH);
@@ -112,16 +113,9 @@ public class PackageContent extends AthleteGridContent implements HasDynamicTitl
     }
 
     public Group getGridGroup() {
-        return groupFilter.getValue();
+        return getGroupFilter().getValue();
     }
 
-    /**
-     * @return the groupFilter
-     */
-    @Override
-    public ComboBox<Group> getGroupFilter() {
-        return groupFilter;
-    }
 
     /**
      * @see com.vaadin.flow.router.HasDynamicTitle#getPageTitle()
@@ -142,7 +136,7 @@ public class PackageContent extends AthleteGridContent implements HasDynamicTitl
 
     public void setGridGroup(Group group) {
         subscribeIfLifting(group);
-        groupFilter.setValue(group);
+        getGroupFilter().setValue(group);
         refresh();
     }
 
@@ -238,7 +232,7 @@ public class PackageContent extends AthleteGridContent implements HasDynamicTitl
 
         crudGrid.setCrudListener(this);
         crudGrid.setClickRowToUpdate(true);
-        crudGrid.getCrudLayout().addToolbarComponent(groupFilter);
+        crudGrid.getCrudLayout().addToolbarComponent(getGroupFilter());
 
         return crudGrid;
     }
@@ -310,19 +304,19 @@ public class PackageContent extends AthleteGridContent implements HasDynamicTitl
      */
     @Override
     protected void defineFilters(GridCrud<Athlete> crud) {
-        groupFilter.setPlaceholder(getTranslation("Group"));
-        groupFilter.setItems(GroupRepository.findAll());
-        groupFilter.setItemLabelGenerator(Group::getName);
+        getGroupFilter().setPlaceholder(getTranslation("Group"));
+        getGroupFilter().setItems(GroupRepository.findAll());
+        getGroupFilter().setItemLabelGenerator(Group::getName);
         // hide because the top bar has it
-        groupFilter.getStyle().set("display", "none");
-        groupFilter.addValueChangeListener(e -> {
+        getGroupFilter().getStyle().set("display", "none");
+        getGroupFilter().addValueChangeListener(e -> {
             logger.debug("updating filters: group={}", e.getValue());
             currentGroup = e.getValue();
             updateURLLocation(getLocationUI(), getLocation(), currentGroup);
             subscribeIfLifting(e.getValue());
         });
-        crud.getCrudLayout().addFilterComponent(groupFilter);
-        
+        crud.getCrudLayout().addFilterComponent(getGroupFilter());
+
         genderFilter.setPlaceholder(getTranslation("Gender"));
         genderFilter.setItems(Gender.M, Gender.F);
         genderFilter.setItemLabelGenerator((i) -> {

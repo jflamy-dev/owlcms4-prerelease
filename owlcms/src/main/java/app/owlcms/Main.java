@@ -28,6 +28,8 @@ import app.owlcms.data.agegroup.AgeGroupRepository;
 import app.owlcms.data.category.AgeDivision;
 import app.owlcms.data.competition.Competition;
 import app.owlcms.data.competition.CompetitionRepository;
+import app.owlcms.data.config.Config;
+import app.owlcms.data.config.ConfigRepository;
 import app.owlcms.data.jpa.DemoData;
 import app.owlcms.data.jpa.JPAService;
 import app.owlcms.data.jpa.ProdData;
@@ -41,7 +43,7 @@ import ch.qos.logback.classic.Logger;
 
 /**
  * Main class for launching owlcms through an embedded jetty server.
- * 
+ *
  * @author Jean-François Lamy
  */
 public class Main {
@@ -73,29 +75,6 @@ public class Main {
             new EmbeddedJetty().run(serverPort, "/");
         } finally {
             tearDown();
-        }
-    }
-
-    private static void startRemoteMonitoring() {
-        try {
-            // Get the MBean server for monitoring/controlling the JVM
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-
-            // Create a JMXMP connector server
-            String jmxPortString = System.getenv("OWLCMS_JMXPORT");
-            jmxPortString = jmxPortString == null ? System.getProperty("jmxPort") : jmxPortString;
-            if (jmxPortString != null) {
-                int jmxPort = StartupUtils.getIntegerParam("jmxPort", 1098);
-                JMXServiceURL url = new JMXServiceURL("jmxmp", "localhost", jmxPort);
-                StartupUtils.getMainLogger().info(
-                        "JMX port {} listening. Connect to service:jmx:jmxmp://externalIp:{}/",
-                        jmxPort,
-                        jmxPort, url);
-                JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
-                cs.start();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -135,6 +114,7 @@ public class Main {
 
         // technical initializations
         System.setProperty("java.net.preferIPv4Stack", "true");
+        System.setProperty("java.net.preferIPv6Addresses", "false");
         ConvertUtils.register(new DateConverter(null), java.util.Date.class);
         ConvertUtils.register(new DateConverter(null), java.sql.Date.class);
 
@@ -183,6 +163,7 @@ public class Main {
                     break;
                 }
             } else {
+                // migrations and other changes
                 logger.info("database not empty: {}", allCompetitions.get(0).getCompetitionName());
                 List<AgeGroup> ags = AgeGroupRepository.findAll();
                 if (ags.isEmpty()) {
@@ -191,6 +172,11 @@ public class Main {
                         AgeGroupRepository.insertAgeGroups(em, null);
                         return null;
                     });
+                }
+                List<Config> configs = ConfigRepository.findAll();
+                if (configs.isEmpty()) {
+                    logger.info("adding config object");
+                    ConfigRepository.save(new Config());
                 }
             }
         } finally {
@@ -284,6 +270,29 @@ public class Main {
 
         // load small dummy data if empty
         smallData = StartupUtils.getBooleanParam("smallMode");
+    }
+
+    private static void startRemoteMonitoring() {
+        try {
+            // Get the MBean server for monitoring/controlling the JVM
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
+            // Create a JMXMP connector server
+            String jmxPortString = System.getenv("OWLCMS_JMXPORT");
+            jmxPortString = jmxPortString == null ? System.getProperty("jmxPort") : jmxPortString;
+            if (jmxPortString != null) {
+                int jmxPort = StartupUtils.getIntegerParam("jmxPort", 1098);
+                JMXServiceURL url = new JMXServiceURL("jmxmp", "localhost", jmxPort);
+                StartupUtils.getMainLogger().info(
+                        "JMX port {} listening. Connect to service:jmx:jmxmp://externalIp:{}/",
+                        jmxPort,
+                        jmxPort, url);
+                JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
+                cs.start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

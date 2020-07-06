@@ -1,14 +1,13 @@
 trigger:
-  - develop
-  - master
+  - none
 
 parameters:
   - name: Revision
     type: string
-    default: 4.7.5-alpha24
+    default: 4.8.0-beta1
   - name: BuildPublicResults
     type: string
-    default: 'false'
+    default: 'true'
 
 variables:
   # -Drevision overrides .mvn config; must be unique if BuildGoal is set to deploy.
@@ -97,6 +96,7 @@ jobs:
           # push changes back to origin and to release repo
           git config user.email "$(Build.RequestedForEmail)"
           git config user.name "$(Build.RequestedFor)"
+          git checkout $(Build.SourceBranchName)
           git add -A && git commit -m "$(Revision)" --allow-empty
           git tag $(Revision) -f -a -m "$(Revision)"
           git push https://$(REPO_TOKEN)@github.com/$(REPO_USER)/owlcms4.git $(Build.SourceBranchName) --force
@@ -110,12 +110,13 @@ jobs:
             repositoryName: jflamy-dev/owlcms4-prerelease
             isPreRelease: true
           ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
-            gitHubConnection: jflamy
+            gitHubConnection: github.com_jflamy-dev
             repositoryName: owlcms/owlcms4
             isPreRelease: false
           action: "create" # Options: create, edit, delete
           target: master # all our releases are on the master branch of the release repos.
           tagSource: "manual"
+          title: $(Revision)
           tag: $(Revision)
           releaseNotesSource: "file"
           releaseNotesFile: $(Build.SourcesDirectory)/ReleaseNotes.md # Optional

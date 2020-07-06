@@ -9,3 +9,5 @@
 /logs/
 /dependency-reduced-pom.xml
 /package.json
+/.flattened-pom.xml
+/webpack.config.js

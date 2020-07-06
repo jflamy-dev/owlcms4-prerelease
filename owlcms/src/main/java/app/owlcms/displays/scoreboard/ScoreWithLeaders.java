@@ -42,11 +42,6 @@ import app.owlcms.data.athleteSort.AthleteSorter;
 import app.owlcms.data.category.Category;
 import app.owlcms.data.competition.Competition;
 import app.owlcms.data.group.Group;
-import app.owlcms.displays.attemptboard.BreakDisplay;
-import app.owlcms.fieldofplay.BreakType;
-import app.owlcms.fieldofplay.UIEvent;
-import app.owlcms.fieldofplay.UIEvent.Decision;
-import app.owlcms.fieldofplay.UIEvent.LiftingOrderUpdated;
 import app.owlcms.i18n.Translator;
 import app.owlcms.init.OwlcmsSession;
 import app.owlcms.ui.lifting.UIEventProcessor;
@@ -54,6 +49,11 @@ import app.owlcms.ui.parameters.DarkModeParameters;
 import app.owlcms.ui.parameters.QueryParameterReader;
 import app.owlcms.ui.shared.RequireLogin;
 import app.owlcms.ui.shared.SafeEventBusRegistration;
+import app.owlcms.uievents.BreakDisplay;
+import app.owlcms.uievents.BreakType;
+import app.owlcms.uievents.UIEvent;
+import app.owlcms.uievents.UIEvent.Decision;
+import app.owlcms.uievents.UIEvent.LiftingOrderUpdated;
 import app.owlcms.utils.LoggerUtils;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -177,7 +177,7 @@ public class ScoreWithLeaders extends PolymerTemplate<ScoreWithLeaders.Scoreboar
             model.setHidden(false);
 
             updateBottom(model, computeLiftType(fop.getCurAthlete()));
-            uiEventLogger.debug("$$$ attemptBoard calling doBreak()");
+            uiEventLogger.debug("$$$ scoreWithLeaders calling doBreak()");
             this.getElement().callJsFunction("doBreak");
         }));
     }
@@ -280,10 +280,6 @@ public class ScoreWithLeaders extends PolymerTemplate<ScoreWithLeaders.Scoreboar
         });
     }
 
-    private boolean isDone() {
-        return this.groupDone;
-    }
-
     @Subscribe
     public void slaveDownSignal(UIEvent.DownSignal e) {
         uiLog(e);
@@ -314,10 +310,6 @@ public class ScoreWithLeaders extends PolymerTemplate<ScoreWithLeaders.Scoreboar
 //          Group g = e.getGroup();
             setDone(true);
         });
-    }
-
-    private void setDone(boolean b) {
-        this.groupDone = b;
     }
 
     @Subscribe
@@ -690,6 +682,14 @@ public class ScoreWithLeaders extends PolymerTemplate<ScoreWithLeaders.Scoreboar
         });
         setTranslationMap();
         order = ImmutableList.of();
+    }
+
+    private boolean isDone() {
+        return this.groupDone;
+    }
+
+    private void setDone(boolean b) {
+        this.groupDone = b;
     }
 
     private void syncWithFOP(UIEvent.SwitchGroup e) {

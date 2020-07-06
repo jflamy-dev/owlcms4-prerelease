@@ -130,22 +130,22 @@
         <dependency>
             <groupId>net.sf.jxls</groupId>
             <artifactId>jxls-core</artifactId>
-            <version>1.0.8.5</version>
+            <version>1.1.3</version>
         </dependency>
         <dependency>
             <groupId>net.sf.jxls</groupId>
             <artifactId>jxls-reader</artifactId>
-            <version>1.0.8.5</version>
+            <version>1.1.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>3.17</version>
+            <version>4.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>3.17</version>
+            <version>4.1.2</version>
         </dependency>
         <dependency>
             <groupId>net.sf.supercsv</groupId>
@@ -155,7 +155,7 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.9.3</version>
+            <version>1.9.4</version>
         </dependency>
 
         <!-- event bus -->
@@ -276,7 +276,7 @@
         </pluginManagement>
 
         <plugins>
-            <!-- Take care of synchronizing java dependencies and imports in package.json  -->
+            <!-- Take care of synchronizing java dependencies and imports in package.json -->
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-maven-plugin</artifactId>
@@ -342,8 +342,31 @@
                             <mainClass>app.owlcms.Main</mainClass>
                             <systemProperties>
                                 <systemProperty>
-                                    <key>demoMode</key>
-                                    <value>true</value>
+                                    <key>initialData</key>
+                                    <value>LARGEGROUP_DEMO</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>resetMode</key>
+                                    <value>false</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>port</key>
+                                    <value>80</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>demo</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>app.owlcms.Main</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>initialData</key>
+                                    <value>LARGEGROUP_DEMO</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <key>memoryMode</key>
@@ -351,7 +374,88 @@
                                 </systemProperty>
                                 <systemProperty>
                                     <key>port</key>
-                                    <value>8082</value>
+                                    <value>80</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>small-reset</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>app.owlcms.Main</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>initialData</key>
+                                    <value>SINGLE_ATHLETE_GROUPS</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>memoryMode</key>
+                                    <value>false</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>resetMode</key>
+                                    <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>port</key>
+                                    <value>80</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>large-reset</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>app.owlcms.Main</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>initialData</key>
+                                    <value>SINGLE_ATHLETE_GROUPS</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>memoryMode</key>
+                                    <value>false</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>resetMode</key>
+                                    <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>port</key>
+                                    <value>80</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>empty-reset</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>app.owlcms.Main</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>initialData</key>
+                                    <value>EMPTY_COMPETITION</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>memoryMode</key>
+                                    <value>false</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>resetMode</key>
+                                    <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>port</key>
+                                    <value>80</value>
                                 </systemProperty>
                             </systemProperties>
                         </configuration>
